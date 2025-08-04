@@ -1,218 +1,120 @@
-# Notes for the fork
+Bzip2
+=====
 
-This is a fork of the bzip2 project version `1.0.6`, with source code downloaded from http://bzip.org. The entire purpose of this is to integrate `cmake` support so that I can build 32 and 64-bit versions on Windows with an arbitrary version of Visual Studio.
+This is Bzip2/libbz2; a program and library for lossless, block-sorting data
+compression.
 
-# Header
+This document pertains to the Bzip2 feature development effort hosted on
+[GitLab.com](https://gitlab.com/bzip2/bzip2).
 
-    This is the README for bzip2/libzip2.
-    This version is fully compatible with the previous public releases.
+The documentation here may differ from that on the Bzip2 1.0.x project page
+maintained by Mark Wielaard on[sourceware.org](https://sourceware.org/bzip2/).
 
-    This file is part of bzip2/libbzip2, a program and library for
-    lossless, block-sorting data compression.
+Copyright (C) 1996-2010 Julian Seward <jseward@acm.org>
 
-    bzip2/libbzip2 version 1.0.6 of 6 September 2010
-    Copyright (C) 1996-2010 Julian Seward <jseward@bzip.org>
+Copyright (C) 2019-2020 Federico Mena Quintero <federico@gnome.org>
 
-    Please read the WARNING, DISCLAIMER and PATENTS sections in this file.
+Copyright (C) 2021 [Micah Snyder](https://gitlab.com/micahsnyder).
 
-    This program is released under the terms of the license contained in the file LICENSE.
+Please read the [WARNING](#warning), [DISCLAIMER](#disclaimer) and
+[PATENTS](#patents) sections in this file for important information.
 
+This program is released under the terms of the license contained in the
+[COPYING](COPYING) file.
 
-> Complete documentation is available in Postscript form (manual.ps),
-PDF (manual.pdf) or html (manual.html).  A plain-text version of the
+------------------------------------------------------------------
+
+This version is fully compatible with the previous public releases.
+
+Complete documentation is available in Postscript form (manual.ps),
+PDF (manual.pdf) or HTML (manual.html).  A plain-text version of the
 manual page is available as bzip2.txt.
 
+## Community Code of Conduct
 
-# HOW TO BUILD -- UNIX
+There is a code of conduct for contributors to Bzip2/libbz2.
+Please see the [`code-of-conduct.md`](code-of-conduct.md) file.
 
-Type 'make'.  This builds the library libbz2.a and then the programs
-bzip2 and bzip2recover.  Six self-tests are run.  If the self-tests
-complete ok, carry on to installation:
+## Contributing to Bzip2's development
 
-To install in /usr/local/bin, /usr/local/lib, /usr/local/man and
-/usr/local/include, type
+The Bzip2 project is hosted on GitLab for feature development work.
+It can be found at https://gitlab.com/bzip2/bzip2
 
-    make install
+Changes to be included in the next feature version are committed to the
+`master` branch.
 
-To install somewhere else, eg, /xxx/yyy/{bin,lib,man,include}, type
+Feature releases are maintained in `release/*` branches.
 
-    make install PREFIX=/xxx/yyy
+Long-term feature and experimental development will occur in feature branches.
+*Feature branches are unstable.* Feature branches may be rebased and force-
+pushed on occasion to keep them up-to-date and to resolve merge conflicts.
 
-If you are (justifiably) paranoid and want to see what 'make install'
-is going to do, you can first do
+The `rustify` branch is a feature branch that represents an effort to
+gradually port Bzip2 to [Rust](https://www.rust-lang.org).
 
-    make -n install                      or
-    make -n install PREFIX=/xxx/yyy      respectively.
+## Report a Bug
 
-The -n instructs make to show the commands it would execute, but not
-actually execute them.
+Please report bugs via [GitLab Issues](https://gitlab.com/bzip2/bzip2/issues).
 
+Before you create a new issue, please verify that no one else has already
+reported the same issue.
 
-## HOW TO BUILD -- UNIX, shared library libbz2.so.
+## Compiling Bzip2 and libbz2
 
-Do `make -f Makefile-libbz2_so`.  This Makefile seems to work for
-Linux-ELF (RedHat 7.2 on an x86 box), with gcc.  I make no claims
-that it works for any other platform, though I suspect it probably
-will work for most platforms employing both ELF and gcc.
+Please see the [`COMPILING.md`](COMPILING.md) file for details.
+This includes instructions for building using Meson or CMake.
 
-bzip2-shared, a client of the shared library, is also built, but not
-self-tested.  So I suggest you also build using the normal Makefile,
-since that conducts a self-test.  A second reason to prefer the
-version statically linked to the library is that, on x86 platforms,
-building shared objects makes a valuable register (%ebx) unavailable
-to gcc, resulting in a slowdown of 10%-20%, at least for bzip2.
+## WARNING
 
-Important note for people upgrading .so's from 0.9.0/0.9.5 to version
-1.0.X.  All the functions in the library have been renamed, from (eg)
-bzCompress to BZ2_bzCompress, to avoid namespace pollution.
-Unfortunately this means that the libbz2.so created by
-Makefile-libbz2_so will not work with any program which used an older
-version of the library.  I do encourage library clients to make the
-effort to upgrade to use version 1.0, since it is both faster and more
-robust than previous versions.
+This program and library (attempts to) compress data by performing several
+non-trivial transformations on it. Unless you are 100% familiar with *all* the
+algorithms contained herein, and with the consequences of modifying them, you
+should NOT meddle with the compression or decompression machinery.
+Incorrect changes can and very likely *will* lead to disastrous loss of data.
 
+**Please contact the maintainers if you want to modify the algorithms.**
 
-# HOW TO BUILD -- Windows 95, NT, DOS, Mac, etc.
+## DISCLAIMER
 
-It's difficult for me to support compilation on all these platforms.
-My approach is to collect binaries for these platforms, and put them
-on the master web site (http://www.bzip.org).  Look there.  However
-(FWIW), bzip2-1.0.X is very standard ANSI C and should compile
-unmodified with MS Visual C.  If you have difficulties building, you
-might want to read README.COMPILATION.PROBLEMS.
+**I TAKE NO RESPONSIBILITY FOR ANY LOSS OF DATA ARISING FROM THE USE OF THIS
+PROGRAM/LIBRARY, HOWSOEVER CAUSED.**
 
-At least using MS Visual C++ 6, you can build from the unmodified
-sources by issuing, in a command shell: 
+Every compression of a file implies an assumption that the compressed file can
+be decompressed to reproduce the original. Great efforts in design, coding and
+testing have been made to ensure that this program works correctly.
 
-   nmake -f makefile.msc
+However, the complexity of the algorithms, and, in particular, the presence of
+various special cases in the code which occur with very low but non-zero
+probability make it impossible to rule out the possibility of bugs remaining in
+the program.
 
-(you may need to first run the MSVC-provided script VCVARS32.BAT
- so as to set up paths to the MSVC tools correctly).
+DO NOT COMPRESS ANY DATA WITH THIS PROGRAM UNLESS YOU ARE PREPARED TO ACCEPT
+THE POSSIBILITY, HOWEVER SMALL, THAT THE DATA WILL NOT BE RECOVERABLE.
 
+That is not to say this program is inherently unreliable.
+Indeed, I very much hope the opposite is true.
+Bzip2/libbz2 has been carefully constructed and extensively tested.
 
-# VALIDATION
+## PATENTS
 
-Correct operation, in the sense that a compressed file can always be
-decompressed to reproduce the original, is obviously of paramount
-importance.  To validate bzip2, I used a modified version of Mark
-Nelson's churn program.  Churn is an automated test driver which
-recursively traverses a directory structure, using bzip2 to compress
-and then decompress each file it encounters, and checking that the
-decompressed data is the same as the original.
+To the best of my knowledge, Bzip2/libbz2 does not use any patented algorithms.
+However, I do not have the resources to carry out a patent search.
+Therefore I cannot give any guarantee of the above statement.
 
+## Maintainers
 
+As of June 2021, [Micah Snyder](https://gitlab.com/micahsnyder) is the
+maintainer of Bzip2/libbz2 for feature development work (I.e. versions 1.1+).
 
-Please read and be aware of the following:
+The Bzip2 feature development project is hosted on GitLab and can be found at
+https://gitlab.com/bzip2/bzip2
 
-##WARNING:
+Bzip2 version 1.0 is maintained by [Mark Wielaard](https://www.klomp.org/mark/)
+at Sourceware and can be found at https://sourceware.org/git/?p=bzip2.git
 
-   This program and library (attempts to) compress data by 
-   performing several non-trivial transformations on it.  
-   Unless you are 100% familiar with *all* the algorithms 
-   contained herein, and with the consequences of modifying them, 
-   you should NOT meddle with the compression or decompression 
-   machinery.  Incorrect changes can and very likely *will* 
-   lead to disastrous loss of data.
+### Special thanks
 
-
-## DISCLAIMER:
-
-   I TAKE NO RESPONSIBILITY FOR ANY LOSS OF DATA ARISING FROM THE
-   USE OF THIS PROGRAM/LIBRARY, HOWSOEVER CAUSED.
-
-   Every compression of a file implies an assumption that the
-   compressed file can be decompressed to reproduce the original.
-   Great efforts in design, coding and testing have been made to
-   ensure that this program works correctly.  However, the complexity
-   of the algorithms, and, in particular, the presence of various
-   special cases in the code which occur with very low but non-zero
-   probability make it impossible to rule out the possibility of bugs
-   remaining in the program.  DO NOT COMPRESS ANY DATA WITH THIS
-   PROGRAM UNLESS YOU ARE PREPARED TO ACCEPT THE POSSIBILITY, HOWEVER
-   SMALL, THAT THE DATA WILL NOT BE RECOVERABLE.
-
-   That is not to say this program is inherently unreliable.  
-   Indeed, I very much hope the opposite is true.  bzip2/libbzip2 
-   has been carefully constructed and extensively tested.
-
-
-# PATENTS:
-
-   To the best of my knowledge, bzip2/libbzip2 does not use any 
-   patented algorithms.  However, I do not have the resources 
-   to carry out a patent search.  Therefore I cannot give any 
-   guarantee of the above statement.
-
-
-
-WHAT'S NEW IN 0.9.0 (as compared to 0.1pl2) ?
-
-   * Approx 10% faster compression, 30% faster decompression
-   * -t (test mode) is a lot quicker
-   * Can decompress concatenated compressed files
-   * Programming interface, so programs can directly read/write .bz2 files
-   * Less restrictive (BSD-style) licensing
-   * Flag handling more compatible with GNU gzip
-   * Much more documentation, i.e., a proper user manual
-   * Hopefully, improved portability (at least of the library)
-
-WHAT'S NEW IN 0.9.5 ?
-
-   * Compression speed is much less sensitive to the input
-     data than in previous versions.  Specifically, the very
-     slow performance caused by repetitive data is fixed.
-   * Many small improvements in file and flag handling.
-   * A Y2K statement.
-
-WHAT'S NEW IN 1.0.0 ?
-
-   See the CHANGES file.
-
-WHAT'S NEW IN 1.0.2 ?
-
-   See the CHANGES file.
-
-WHAT'S NEW IN 1.0.3 ?
-
-   See the CHANGES file.
-
-WHAT'S NEW IN 1.0.4 ?
-
-   See the CHANGES file.
-
-WHAT'S NEW IN 1.0.5 ?
-
-   See the CHANGES file.
-
-WHAT'S NEW IN 1.0.6 ?
-
-   See the CHANGES file.
-
-
-I hope you find bzip2 useful.  Feel free to contact me at
-   jseward@bzip.org
-if you have any suggestions or queries.  Many people mailed me with
-comments, suggestions and patches after the releases of bzip-0.15,
-bzip-0.21, and bzip2 versions 0.1pl2, 0.9.0, 0.9.5, 1.0.0, 1.0.1,
-1.0.2 and 1.0.3, and the changes in bzip2 are largely a result of this
-feedback.  I thank you for your comments.
-
-bzip2's "home" is http://www.bzip.org/
-
-Julian Seward
-jseward@bzip.org
-Cambridge, UK.
-
-18     July 1996 (version 0.15)
-25   August 1996 (version 0.21)
- 7   August 1997 (bzip2, version 0.1)
-29   August 1997 (bzip2, version 0.1pl2)
-23   August 1998 (bzip2, version 0.9.0)
- 8     June 1999 (bzip2, version 0.9.5)
- 4     Sept 1999 (bzip2, version 0.9.5d)
- 5      May 2000 (bzip2, version 1.0pre8)
-30 December 2001 (bzip2, version 1.0.2pre1)
-15 February 2005 (bzip2, version 1.0.3)
-20 December 2006 (bzip2, version 1.0.4)
-10 December 2007 (bzip2, version 1.0.5)
- 6     Sept 2010 (bzip2, version 1.0.6)
+Thanks to Julian Seward, the original author of Bzip2/libbz2, for creating the
+program and making it a very compelling alternative to previous compression
+programs back in the early 2000's. Thanks to Julian also for letting Federico,
+Mark, and Micah carry on with the maintainership of the program.
