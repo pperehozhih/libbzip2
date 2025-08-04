@@ -1,1 +1,9 @@
-build*
+*.o
+*.obj
+*.rb2
+*.tst
+*.a
+*.lib
+*.exe
+bzip2
+bzip2recover
